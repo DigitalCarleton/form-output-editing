@@ -1,1 +1,0 @@
-TODO: JSON config instructions
