@@ -27,5 +27,6 @@ a new field.
 
 ## Changelog
 
-**Version 0.0.1**:
-- 
+Versions are listed most recent to least recent.
+
+### Version 0.0.1:
