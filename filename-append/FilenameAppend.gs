@@ -1,8 +1,10 @@
+// ======================= MANUAL FUNCTIONS ======================= //
+
 /**
- * Generates the properties that this script needs to run. MUST be run manually when
- * attaching to a new Form response Spreadsheet.
- * To run this function manually, click the "Select function" dropdown menu above,
- * choose genProperties, and hit "Run" (the play button to the left).
+ * Generates the properties that this script needs to run. MUST be run 
+ * manually when attaching to a new Form response Spreadsheet.
+ * To run this function manually, click the "Select function" dropdown men
+ * above, choose genProperties, and hit "Run" (the play button to the left).
  */
 function genProperties() {
   var defaultProperties = {
@@ -12,6 +14,16 @@ function genProperties() {
   var documentProperties = PropertiesService.getDocumentProperties();
   documentProperties.setProperties(defaultProperties);
 }
+
+/**
+ * Writes the current properties to the Log. Navigate to View > Log to view
+ * this output.
+ */
+function viewProperties() {
+  Logger.log(PropertiesService.getDocumentProperties().getProperties());
+}
+
+// ====================== AUTOMATIC FUNCTIONS ===================== //
 
 /**
  *
@@ -35,7 +47,8 @@ function setupSheet(sheet, documentProperties) {
   var filenameIndex = headers.indexOf(filenameField) + 1;
   if (filenameIndex < 1) {
     // Generate filename column
-    filenameIndex = cols + 1; // Next available column
+    sheet.insertColumnAfter(uploadIndex); // Insert filename column
+    filenameIndex = uploadIndex + 1; // Inserted right of upload filed
     var headerCell = sheet.getRange(1, filenameIndex);
     headerCell.setValue(filenameField);
   }
@@ -76,14 +89,24 @@ function addFilename(row, sheet, uploadIndex, filenameIndex) {
 }
 
 /**
+ * This function MUST be tied to the onFormSubmit event of the
+ * container spreadsheet. To do so, first right-click this script
+ * from the Apps Script file listing, then select "Triggers". On 
+ * the resulting page, choose to "Add Trigger". Choose the
+ * following options for the trigger settings:
  *
+ * Choose which function to run: onFormSubmit
+ * Choose which deployment should run: Head
+ * Select event source: From spreadsheet
+ * Select event type: On form submit
  */
 function onFormSubmit(e) {
   // Retrieve metadata
   var documentProperties = PropertiesService.getDocumentProperties();
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
   // Initialize index properties if uninitialized
-  if (!("UPLOAD_INDEX" in documentProperties.getKeys()) || !("FILENAME_INDEX" in documentProperties.getKeys())) {
+  if (!("UPLOAD_INDEX" in documentProperties.getKeys()) || 
+      !("FILENAME_INDEX" in documentProperties.getKeys())) {
     setupSheet(sheet, documentProperties);
   }
   var uploadIndex = documentProperties.getProperty("UPLOAD_INDEX");
