@@ -1,118 +1,136 @@
-// ======================= MANUAL FUNCTIONS ======================= //
+/**
+ * A simple replicable script that auto-detects Drive file URLs in a Form
+ * response Spreadsheet and provides the associated filenames.
+ * * * *
+ * To use, copy into the script editor of a Form response Spreadsheet, then:
+ * (1) Run manualUpdate() (and grant permissions to this script)
+ * (2) Attach autoUpdate() to the "On Form Submit" event
+ * Further instructions are available on the functions in question.
+ * * * *
+ * @author Luna Yee (yeec@carleton.edu), Carleton Digital Humanities
+ */
 
 /**
- * Generates the properties that this script needs to run. MUST be run 
- * manually when attaching to a new Form response Spreadsheet.
- * To run this function manually, click the "Select function" dropdown men
- * above, choose genProperties, and hit "Run" (the play button to the left).
+ * MANUALLY RUN THIS FUNCTION
+ * --------------------------
+ * Run this function with the container spreadsheet open to manually update
+ * filenames for all rows in the spreadsheet.
+ * * * *
+ * To run this function manually:
+ * (1) From "Select function" dropdown menu above, choose "manualUpdate"
+ * (2) Click "Run" (the play button to the left of the dropdown menu)
  */
-function genProperties() {
-  var defaultProperties = {
-    "UPLOAD_FIELD": "Image Upload",
-    "FILENAME_FIELD": "Filename"
-  };
-  var documentProperties = PropertiesService.getDocumentProperties();
-  documentProperties.setProperties(defaultProperties);
+function manualUpdate() {
+  // Retrieve metadata
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  // Update values
+  update(sheet)
 }
 
 /**
- * Writes the current properties to the Log. Navigate to View > Log to view
- * this output.
+ * ATTACH THIS FUNCTION TO THE "ON FORM SUBMIT" EVENT
+ * --------------------------------------------------
+ * This method will automatically update the container spreadsheet with
+ * filenames whenever a form is submitted.
+ * * * *
+ * To attach this function to the "On form submit" event:
+ * (1) Click the arrow icon in upper left, "Google Apps Script Dashboard"
+ * (2) Right-click this script and choose "Triggers"
+ * (3) Click "+ Add Trigger" in the bottom right
+ * (4) For "Choose which function to run", choose "autoUpdate"
+ * (5) For "Select event type", choose "On form submit"
+ * (6) Review "Failure notification settings" and hit "Save"
+ * WARNING: Run manualUpdate FIRST to grant permissions to this script
+ * * * *
+ * @param e Event details
  */
-function viewProperties() {
-  Logger.log(PropertiesService.getDocumentProperties().getProperties());
+function autoUpdate(e) {
+  // Retrieve metadata
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  // Update the submission row
+  var row = e.range.getRow();
+  if (row > sheet.getLastRow()) throw "Row index out of bounds: " + row
+  updateRow(sheet, row);
 }
 
-// ====================== AUTOMATIC FUNCTIONS ===================== //
+// SUPPORTING METHODS
 
 /**
- *
+ * Checks whether the value is a valid, accessible Drive URL.
+ * @param value
+ * @return true if usable Drive URL; false otherwise
  */
-function setupSheet(sheet, documentProperties) {
-  // Retrieve document properties
-  var uploadField = documentProperties.getProperty("UPLOAD_FIELD");
-  var filenameField = documentProperties.getProperty("FILENAME_FIELD");
-  // Retrieve sheet metadata
-  var rows = sheet.getLastRow();
-  var cols = sheet.getLastColumn();
-  // Retrieve the headers on the sheet
-  var headers = sheet.getRange(1, 1, 1, cols).getValues()[0];
-  
-  // Find upload field index and save property
-  var uploadIndex = headers.indexOf(uploadField) + 1;
-  if (uploadIndex < 1) throw uploadField + "not found";
-  documentProperties.setProperty("UPLOAD_INDEX", uploadIndex);
-  
-  // Find/create filename field index and save property
-  var filenameIndex = headers.indexOf(filenameField) + 1;
-  if (filenameIndex < 1) {
-    // Generate filename column
-    sheet.insertColumnAfter(uploadIndex); // Insert filename column
-    filenameIndex = uploadIndex + 1; // Inserted right of upload filed
-    var headerCell = sheet.getRange(1, filenameIndex);
-    headerCell.setValue(filenameField);
+function isDriveFile(value) {
+  if (value == null) return false;
+  value = value.toString();
+  // Check if Drive URL
+  if (value.indexOf("https://drive.google.com/open?id=") === -1) return false;
+  // Check if valid and accessible
+  var driveId = value.slice(value.indexOf("=") + 1);
+  try {
+    var file = DriveApp.getFileById(driveId);
+  } catch(err) {
+    return false;
   }
-  documentProperties.setProperty("FILENAME_INDEX", filenameIndex);
-  
-  // Update all current entries before the most recent (if any)
-  for (var row = 2; row < rows; row++) {
-    addFilename(row, sheet, uploadIndex, filenameIndex);
-  }
+  return true;
 }
 
 /**
  * Fetches the filename of a file by its Drive URL using DriveApp.
+ * @param driveUrl URL of the Drive file
+ * @return string filename of the Drive file
  */
 function getFilename(driveUrl) {
   driveUrl = driveUrl.toString();
-  var idIndex = driveUrl.lastIndexOf("=") + 1;
-  var driveId = driveUrl.slice(idIndex);
+  var driveId = driveUrl.slice(driveUrl.indexOf("=") + 1);
   var file = DriveApp.getFileById(driveId);
-  var filename = file.getName();
-  
-  return filename;
+
+  return file.getName();
 }
 
 /**
- * Retrieves the filename of a file submission, the URL of
- * which resides in the uploadIndex column, and inserts this
- * value in the filenameIndex column.
+ * Updates a single row in the sheet with filenames of any Drive
+ * files.
+ * @param sheet Form response sheet of the Spreadsheet
+ * @param row Row of the submission to update
  */
-function addFilename(row, sheet, uploadIndex, filenameIndex) {
-  // Retrieve upload URL from sheet, and get filename
-  var uploadCell = sheet.getRange(row, uploadIndex);
-  var filename = getFilename(uploadCell.getValue());
-  
-  // Push filename to sheet
-  var filenameCell = sheet.getRange(row, filenameIndex);
-  filenameCell.setValue(filename);
-}
+function updateRow(sheet, row) {
+  // Retrieve sheet data
+  var rows = sheet.getLastRow();
+  var cols = sheet.getLastColumn();
+  var headers = sheet.getRange(1, 1, 1, cols).getValues()[0];
+  var activeRow = sheet.getRange(row, 1, 1, cols).getValues()[0];
 
-/**
- * This function MUST be tied to the onFormSubmit event of the
- * container spreadsheet. To do so, first right-click this script
- * from the Apps Script file listing, then select "Triggers". On 
- * the resulting page, choose to "Add Trigger". Choose the
- * following options for the trigger settings:
- *
- * Choose which function to run: onFormSubmit
- * Choose which deployment should run: Head
- * Select event source: From spreadsheet
- * Select event type: On form submit
- */
-function onFormSubmit(e) {
-  // Retrieve metadata
-  var documentProperties = PropertiesService.getDocumentProperties();
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  // Initialize index properties if uninitialized
-  if (!("UPLOAD_INDEX" in documentProperties.getKeys()) || 
-      !("FILENAME_INDEX" in documentProperties.getKeys())) {
-    setupSheet(sheet, documentProperties);
+  // Search through active row for drive files
+  for (var col=1; col<=cols; col++) {
+    var value = activeRow[col-1];
+    if (isDriveFile(value)) {
+      var filename = getFilename(value);
+      var activeHeader = headers[col-1] + " (Filename)";
+      // If there is no existing filename field for this header, add one
+      if (headers.indexOf(activeHeader) == -1) {
+        sheet.insertColumnAfter(col);
+        headers.splice(col, 0, activeHeader);
+        sheet.getRange(1, col + 1).setValue(activeHeader);
+      }
+      // Add filename
+      var filenameIndex = headers.indexOf(activeHeader) + 1;
+      sheet.getRange(row, filenameIndex).setValue(filename);
+    }
   }
-  var uploadIndex = documentProperties.getProperty("UPLOAD_INDEX");
-  var filenameIndex = documentProperties.getProperty("FILENAME_INDEX");
-  
-  // Update the newest submission
-  var activeRow = sheet.getLastRow();
-  addFilename(activeRow, sheet, uploadIndex, filenameIndex);
+}
+
+/**
+ * Updates all rows in the sheet with filenames of any Drive
+ * files.
+ * @param sheet Form response sheet of the Spreadsheet
+ */
+function update(sheet) {
+  // Update every row
+  var rows = sheet.getLastRow();
+  if (rows > 1) {
+    for (var i=2; i<=rows; i++) {
+      updateRow(sheet, i);
+    }
+  }
 }
