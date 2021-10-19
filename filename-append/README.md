@@ -13,6 +13,10 @@ a new field.
 
 ## How to Use
 
+### Step 1: Open a new Google form with option to "upload file" enabled
+
+![Screenshot-upload-enabled-google-form](/screenshots/form_example.png?raw=true "Form example")
+
 ### Step 1: Generate the Results Spreadsheet
 
 ### Step 2: Attach the Script (Copy-Paste)
@@ -23,7 +27,7 @@ a new field.
 
 ## Known Issues
 
-- 
+-
 
 ## Changelog
 
