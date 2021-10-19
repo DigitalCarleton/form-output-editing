@@ -15,7 +15,7 @@ a new field.
 
 ### Step 1: Open a new Google form with option to "upload file" enabled
 
-![Screenshot-upload-enabled-google-form](/screenshots/form_example.png?raw=true "Form example")
+![Screenshot-upload-enabled-google-form](./screenshots/form_example.png?raw=true "Form example")
 
 ### Step 1: Generate the Results Spreadsheet
 
