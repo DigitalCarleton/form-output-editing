@@ -15,15 +15,33 @@ a new field.
 
 ### Step 1: Open a new Google form with option to "upload file" enabled
 
-![Screenshot-upload-enabled-google-form](./screenshots/form_example.png?raw=true "Form example")
+![upload-enabled-google-form](./screenshots/form_example.png?raw=true "Form example")
 
-### Step 1: Generate the Results Spreadsheet
+### Step 1: Link a Google Sheet to the form
 
-### Step 2: Attach the Script (Copy-Paste)
+![how-to-link-form](./screenshots/link_form_sheet.png?raw=true "Linking example")
 
-### Step 3: Initialize the Document Properties
+![sheet-before-script](./screenshots/sheet_before_script.png?raw=true "Sheet before script is ran")
 
-### Step 4: Test with a Submission
+### Step 2: Attach the Script (Copy-Paste) into Sheet's Script Editor
+
+![sheet-script-editor](./screenshots/sheet_script_editor.png?raw=true "How to get to script editor in Sheet")
+
+![sheet-editor-pasted](./screenshots/sheet_editor_pasted.png?raw=true "Script editor after code is pasted")
+
+### Step 2b: make sure to SAVE editor after script has been copied over (step 3 will be greyed out otherwise)
+
+![save-script-editor](./screenshots/save_script.png?raw=true "Save editor")
+
+### Step 3: Run manualUpdate function (Google will ask to enable permission for the first run)
+
+![run-manual-update](./screenshots/run_manual_update.png?raw=true "Run manual update")
+
+#### Check result (note: there should be a new column titled "Upload file here (Filename)". Title will follow "<image_name>-<author>.<file_extension> format).
+
+![sheet-after-script-is-ran](./screenshots/sheet_after_script.png?raw=true "Sheet after manualUpdate is ran")
+
+## Auto update on submission
 
 ## Known Issues
 
