@@ -43,6 +43,20 @@ a new field.
 
 ## Auto update on submission
 
+To enable auto update, bind autoUpdate function to "On form submit" trigger
+
+### Step 1: Navigate to Triggers panel
+
+![navigate-to-triggers-top-left](./screenshots/script_trigger.png?raw=true "Navigating to Trigger function")
+
+### Step 2: Add Trigger (bottom right corner)
+
+![add-trigger-bottom-right-blue-button](./screenshots/add_trigger.png?raw=true "Adding new trigger")
+
+### Step 3: Configure trigger to fire manualUpdate "On form submit"
+
+![trigger-configuration-for-manualUpdate-onFormSubmit](./screenshots/trigger-setting.png?raw=true "Trigger configuration to fire function "On form submit")
+
 ## Known Issues
 
 -
