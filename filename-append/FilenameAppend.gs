@@ -7,7 +7,7 @@
  * (2) Attach autoUpdate() to the "On Form Submit" event
  * Further instructions are available on the functions in question.
  * * * *
- * @author Luna Yee (yeec@carleton.edu), Carleton Digital Humanities
+ * @author Luna Yee (yeec@carleton.edu), Carleton Digital Humanitiesh
  */
 
 /**
@@ -21,10 +21,10 @@
  * (2) Click "Run" (the play button to the left of the dropdown menu)
  */
 function manualUpdate() {
-  // Retrieve metadata
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  // Update values
-  update(sheet)
+	// Retrieve metadata
+	var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+	// Update values
+	update(sheet);
 }
 
 /**
@@ -45,12 +45,12 @@ function manualUpdate() {
  * @param e Event details
  */
 function autoUpdate(e) {
-  // Retrieve metadata
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  // Update the submission row
-  var row = e.range.getRow();
-  if (row > sheet.getLastRow()) throw "Row index out of bounds: " + row
-  updateRow(sheet, row);
+	// Retrieve metadata
+	var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+	// Update the submission row
+	var row = e.range.getRow();
+	if (row > sheet.getLastRow()) throw "Row index out of bounds: " + row;
+	updateRow(sheet, row);
 }
 
 // SUPPORTING METHODS
@@ -61,18 +61,18 @@ function autoUpdate(e) {
  * @return true if usable Drive URL; false otherwise
  */
 function isDriveFile(value) {
-  if (value == null) return false;
-  value = value.toString();
-  // Check if Drive URL
-  if (value.indexOf("https://drive.google.com/open?id=") === -1) return false;
-  // Check if valid and accessible
-  var driveId = value.slice(value.indexOf("=") + 1);
-  try {
-    var file = DriveApp.getFileById(driveId);
-  } catch(err) {
-    return false;
-  }
-  return true;
+	if (value == null) return false;
+	value = value.toString();
+	// Check if Drive URL
+	if (value.indexOf("https://drive.google.com/open?id=") === -1) return false;
+	// Check if valid and accessible
+	var driveId = value.slice(value.indexOf("=") + 1);
+	try {
+		var file = DriveApp.getFileById(driveId);
+	} catch (err) {
+		return false;
+	}
+	return true;
 }
 
 /**
@@ -81,11 +81,11 @@ function isDriveFile(value) {
  * @return string filename of the Drive file
  */
 function getFilename(driveUrl) {
-  driveUrl = driveUrl.toString();
-  var driveId = driveUrl.slice(driveUrl.indexOf("=") + 1);
-  var file = DriveApp.getFileById(driveId);
+	driveUrl = driveUrl.toString();
+	var driveId = driveUrl.slice(driveUrl.indexOf("=") + 1);
+	var file = DriveApp.getFileById(driveId);
 
-  return file.getName();
+	return file.getName();
 }
 
 /**
@@ -95,29 +95,31 @@ function getFilename(driveUrl) {
  * @param row Row of the submission to update
  */
 function updateRow(sheet, row) {
-  // Retrieve sheet data
-  var rows = sheet.getLastRow();
-  var cols = sheet.getLastColumn();
-  var headers = sheet.getRange(1, 1, 1, cols).getValues()[0];
-  var activeRow = sheet.getRange(row, 1, 1, cols).getValues()[0];
+	// Retrieve sheet data
+	var rows = sheet.getLastRow();
+	var cols = sheet.getLastColumn();
+	var headers = sheet.getRange(1, 1, 1, cols).getValues()[0];
+	var activeRow = sheet.getRange(row, 1, 1, cols).getValues()[0];
 
-  // Search through active row for drive files
-  for (var col=1; col<=cols; col++) {
-    var value = activeRow[col-1];
-    if (isDriveFile(value)) {
-      var filename = getFilename(value);
-      var activeHeader = headers[col-1] + " (Filename)";
-      // If there is no existing filename field for this header, add one
-      if (headers.indexOf(activeHeader) == -1) {
-        sheet.insertColumnAfter(col);
-        headers.splice(col, 0, activeHeader);
-        sheet.getRange(1, col + 1).setValue(activeHeader);
-      }
-      // Add filename
-      var filenameIndex = headers.indexOf(activeHeader) + 1;
-      sheet.getRange(row, filenameIndex).setValue(filename);
-    }
-  }
+	// Search through active row for drive files
+	for (var col = 1; col <= cols; col++) {
+		var value = activeRow[col - 1];
+		if (isDriveFile(value)) {
+			var rawFilename = getFilename(value);
+			var filename = rawFilename.replace(/\s/g, "_");
+			var activeHeader = headers[col - 1] + " (Filename)";
+			// If there is no existing filename field for this header, add one
+			if (headers.indexOf(activeHeader) == -1) {
+				sheet.insertColumnAfter(col);
+				headers.splice(col, 0, activeHeader);
+				sheet.getRange(1, col + 1).setValue(activeHeader);
+			}
+			// Add filename
+			var filenameIndex = headers.indexOf(activeHeader) + 1;
+			sheet.getRange(row, filenameIndex).setValue(filename.length);
+			sheet.getRange(row, filenameIndex + 1).setValue(filename);
+		}
+	}
 }
 
 /**
@@ -126,11 +128,11 @@ function updateRow(sheet, row) {
  * @param sheet Form response sheet of the Spreadsheet
  */
 function update(sheet) {
-  // Update every row
-  var rows = sheet.getLastRow();
-  if (rows > 1) {
-    for (var i=2; i<=rows; i++) {
-      updateRow(sheet, i);
-    }
-  }
+	// Update every row
+	var rows = sheet.getLastRow();
+	if (rows > 1) {
+		for (var i = 2; i <= rows; i++) {
+			updateRow(sheet, i);
+		}
+	}
 }
