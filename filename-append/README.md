@@ -55,6 +55,7 @@ To enable auto update, bind autoUpdate function to "On form submit" trigger
 
 ### Step 3: Configure trigger to fire manualUpdate "On form submit"
 
+![add-trigger-bottom-right-blue-button](./screenshots/add_trigger.png?raw=true "Adding new trigger")
 ![trigger-configuration-for-manualUpdate-onFormSubmit](./screenshots/trigger_setting.png?raw=true "Trigger configuration to fire function "On form submit")
 
 ## Known Issues
